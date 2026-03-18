@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit Form</title>
+</head>
+<body>
+    <form action="/app/present" method="get">
+        <label for="uname">User Name</label><input type="text" name="uname" id="uname"><br/>
+        <label for="status">Status</label><br/>
+        <label for="status">ONLINE</label><input type="checkbox" name="status" value="ONLINE">
+        <label for="status">AWAY</label><input type="checkbox" name="status" value="AWAY">
+        <label for="status">BUSY</label><input type="checkbox" name="status" value="BUSY">
+        <label for="status">OFFLINE</label><input type="checkbox" name="status" value="OFFLINE">
+        <button type="submit">Submit</button>
+    </form>
+</body>
+</html>
