@@ -111,6 +111,9 @@ public class UserLogin implements Serializable{
             //                  the columns "username", "PW_Hash" and "token"
             //                  using Parameter Markers for "username" and "PW_Hash" values, and;
             //                  using SHA2(RAND(), 256) for "token"'s value
+        try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO users (username, PW_Hash, token) VALUES (?, ?, SHA2(RAND(), 256)")) { // Catch SQLException to get rid of this giant error
+
+        }
         // TODO: In the body
             // TODO: ensure the following line is inside the try body
             byte[] hash = BCrypt.withDefaults().hash(12, userPassword.getBytes("UTF-16"));
