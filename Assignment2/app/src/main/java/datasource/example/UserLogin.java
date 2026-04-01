@@ -1,19 +1,18 @@
 package datasource.example;
 
-import at.favre.lib.crypto.bcrypt.BCrypt;
-
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
-import java.sql.SQLException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 
+import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
-import javax.naming.Context;
 
+import at.favre.lib.crypto.bcrypt.BCrypt;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.SessionScoped;
@@ -102,6 +101,26 @@ public class UserLogin implements Serializable{
         // TODO: Catch SQL Exceptions
             // TODO: set message to the exception's message
             // TODO: return
+        try {
+            PreparedStatement stmt = conn.prepareStatement("SELECT (userID, token, PW_Hash) FROM users WHERE username = ?");
+            stmt.setString(1, userName);
+            try {ResultSet rs = stmt.executeQuery();
+                if (rs.next() == true) {
+                    if (verifyPassword(rs.getBytes("PW_Hash"))) {
+                        token = rs.getString("token");
+                        userId = rs.getInt("userID");
+                        message = "";
+                    } else {
+                        message = "Invalid login";
+                    }
+                }
+            } catch (SQLException | UnsupportedEncodingException e) {
+                message = e.getMessage();
+                return;
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     public void signup() {
@@ -111,12 +130,9 @@ public class UserLogin implements Serializable{
             //                  the columns "username", "PW_Hash" and "token"
             //                  using Parameter Markers for "username" and "PW_Hash" values, and;
             //                  using SHA2(RAND(), 256) for "token"'s value
-        try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO users (username, PW_Hash, token) VALUES (?, ?, SHA2(RAND(), 256)")) { // Catch SQLException to get rid of this giant error
-
-        }
         // TODO: In the body
             // TODO: ensure the following line is inside the try body
-            byte[] hash = BCrypt.withDefaults().hash(12, userPassword.getBytes("UTF-16"));
+            // byte[] hash = BCrypt.withDefaults().hash(12, userPassword.getBytes("UTF-16"));
             // TODO: set the "username" Parameter marker to userName
             // TODO: set the "PW_Hash" Parameter marker to hash
             // TODO: execute the statement as an update and store the number of affected rows in an integer variable
@@ -127,6 +143,20 @@ public class UserLogin implements Serializable{
         // TODO: Catch SQL and UnsupportedEncoding Exceptions
             // TODO: set message to the exception's message
             // TODO: return
+        try {
+            PreparedStatement stmt = conn.prepareStatement("INSERT INTO users (username, PW_Hash, token) VALUES (?, ?, SHA2(RAND(), 256)");
+            byte[] hash = BCrypt.withDefaults().hash(12, userPassword.getBytes("UTF-16"));
+            stmt.setString(1, userName);
+            stmt.setBytes(2, hash);
+            int rowsAffected = stmt.executeUpdate();
+            if (rowsAffected != 1) {
+                message = "Failed to create new user: " + userName;
+            } else {
+                message = "Successfully created new user: " + userName;
+            }
+        } catch (SQLException | UnsupportedEncodingException e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     public String getUserName() {

@@ -1,7 +1,6 @@
 package datasource.example;
 
 import java.io.Serializable;
-import java.rmi.Naming;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -11,14 +10,13 @@ import java.time.Instant;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
-import javax.naming.Context;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
-import jakarta.enterprise.context.RequestScoped;
 import jakarta.enterprise.context.SessionScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
@@ -116,6 +114,15 @@ public class Messages implements Serializable{
         // TODO: Catch SQL Exceptions
             // TODO: print the exception's message to System.out
         // TODO: call pullLog();
+        try {PreparedStatement stmt = conn.prepareStatement("INSERT INTO messages (message, sentOn, userID) VALUES (?, ?, ?)");
+            stmt.setString(1, messageToPost);
+            stmt.setTimestamp(2, new Timestamp(Instant.now().toEpochMilli()));
+            stmt.setInt(3, login.getUserId());
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        pullLog();
     }
 
     public List<String> getChatLog(){
