@@ -84,12 +84,14 @@ public class Messages implements Serializable{
         // TODO: Catch SQL Exceptions
             // TODO: print the exception's message to System.out
         try (
-            PreparedStatement stmt = conn.prepareStatement("SELECT messages.message, messages.sentOn, users.userID FROM messages INNER JOIN users ON messages.userID = users.userID");
+            PreparedStatement stmt = conn.prepareStatement("SELECT messages.message, messages.sentOn, users.username FROM messages INNER JOIN users ON messages.userID = users.userID");
             ResultSet rs = stmt.executeQuery();
         ) {
             chatLog.clear();
             while (rs.next()) {
                 StringBuilder sb = new StringBuilder();
+                sb.append(rs.getString(3));
+                sb.append("@");
                 sb.append(rs.getTimestamp(2));
                 sb.append(": ");
                 sb.append(rs.getString(1));

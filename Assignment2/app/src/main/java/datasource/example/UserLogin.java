@@ -51,7 +51,7 @@ public class UserLogin implements Serializable{
             // TODO: Get the DataSource by lookup with jdbc/Assignment2 under the /comp/env/ in the context
             // TODO: Use getConnection on the datasource to assign the conn field
         try {
-            String token = null;
+            token = null;
             Context ctx = new InitialContext();
             DataSource ds = (DataSource)ctx.lookup("java:/comp/env/jdbc/Assignment2");
             this.conn = ds.getConnection();
@@ -101,8 +101,8 @@ public class UserLogin implements Serializable{
         // TODO: Catch SQL Exceptions
             // TODO: set message to the exception's message
             // TODO: return
-        try {
-            PreparedStatement stmt = conn.prepareStatement("SELECT (userID, token, PW_Hash) FROM users WHERE username = ?");
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT userID, token, PW_Hash FROM users WHERE username = ?")){
+            
             stmt.setString(1, userName);
             try {ResultSet rs = stmt.executeQuery();
                 if (rs.next() == true) {
@@ -124,6 +124,7 @@ public class UserLogin implements Serializable{
     }
 
     public void signup() {
+        
         // TODO: In a try-with-resources resource block
             // TODO: Create the following resource:
             // TODO: 1. A PreparedStatement that inserts into the users table,
@@ -143,8 +144,8 @@ public class UserLogin implements Serializable{
         // TODO: Catch SQL and UnsupportedEncoding Exceptions
             // TODO: set message to the exception's message
             // TODO: return
-        try {
-            PreparedStatement stmt = conn.prepareStatement("INSERT INTO users (username, PW_Hash, token) VALUES (?, ?, SHA2(RAND(), 256)");
+        try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO users (username, PW_Hash, token) VALUES (?, ?, SHA2(RAND(), 256))")) {
+            
             byte[] hash = BCrypt.withDefaults().hash(12, userPassword.getBytes("UTF-16"));
             stmt.setString(1, userName);
             stmt.setBytes(2, hash);
