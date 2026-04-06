@@ -12,6 +12,11 @@ import javax.sql.DataSource;
 
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
+import java.sql.ResultSet;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+
 
 @Path("friends")
 public class Friends {
@@ -47,3 +52,9 @@ public class Friends {
     }
 }
     }}
+    // TODO Put this where it belongs
+    PreparedStatement validateUserTmt = conn.prepareStatement("INSERT INTO friends (sendingUserID, receivingUserID) " + "VALUES (?, ?, ?);");
+    insertRequestStmt.setInt(1, sendingUDI);
+    insertRequestStmt.setInt(2, receivingUID);
+    int inserted = insertRequestStmt.execcuteUpdate();
+    return inserted == 1 ? 0 : 4;
