@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cars</title>
+    <script type="module" src="index.mjs"></script>
+</head>
+<body>
+    <!--  -->
+    <button type="button" id="get_all_button">Get All Cars</button>
+    <form action="">
+        <label for="get_by_make">Make:</label><input type="text" name="make" id="get_by_make" required><br/>
+        <button type="button" id="get_by_make_button">Get By Make</button>
+    </form>
+    <form action="">
+        <label for="get_by_make_and_model_make">Make:</label><input type="text" name="make" id="get_by_make_and_model_make" required><br/>
+        <label for="get_by_make_and_model_model">Model:</label><input type="text" name="model" id="get_by_make_and_model_model" required><br/>
+        <button type="button" id="get_by_make_and_model_button">Get By Make And Model</button>
+    </form>
+    <form action="">
+        <label for="get_by_year">Year:</label><input type="number" name="year" id="get_by_year" min="1920" max="2027"><br/>
+        <button type="button" id="get_by_year_button">Get By Year</button>
+    </form>
+    <form action="">
+        <label for="post_make">Make:</label><input type="text" name="make" id="post_make" required><br/>
+        <label for="post_model">Model:</label><input type="text" name="model" id="post_model" required><br/>
+        <label for="post_year">Year:</label><input type="number" name="year" id="post_year" min="1920" max="2027"><br/>
+        <button type="button" id="post_button">Add Car To DB</button>
+    </form>
+    <div id="results"></div>
+</body>
+</html>
