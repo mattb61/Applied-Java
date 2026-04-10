@@ -3,6 +3,7 @@ package assignment3;
 import assignment3.model.Car;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 
 import java.util.List;
@@ -76,8 +77,16 @@ public class App {
     // TODO: Make a function called getCarByMake that returns a List of Cars
     @Produces("application/json")
     @Path("make")
-    public List<Car> getCarByMake() {
-
+    @GET
+    public List<Car> getCarByMake(
+        @PathParam("make") String make
+    ) {
+        List<Car> cars = new ArrayList<>();
+        try {
+            Context ctx = new InitialContext();
+            DataSource ds = (DataSource)ctx.lookup("java:/comp/env/jdbc/Cars")
+            PreparedStatement stmt = conn.prepareStatement
+        } 
     }
     // TODO: Annotate that functions with a Produces annotation, and set the type to "application/json"
     // TODO: Annotate that functions with a Path annotation, and set the path to "{make}"
