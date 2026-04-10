@@ -1,7 +1,10 @@
 package assignment3;
 
 import assignment3.model.Car;
+import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+
 import java.util.List;
 import java.util.ArrayList;
 import javax.naming.Context;
@@ -17,39 +20,39 @@ import jakarta.inject.Named;
 // TODO: Annotate this class with a Path annotation, and set the path to "cars"
 @Path("cars")
 public class App {
-    private Connection conn;
-    private String make;
-    private String model;
-    private int id;
-    private int year;
 
     // TODO: Make a function called getCars that returns a List of Cars
-    public List<String> getCars() {
-        @Produces("application/json")
-        @Path("all")
-        @GET
-        List<String> cars = new ArrayList<>();
+    @Produces("application/json")
+    @Path("all")
+    @GET
+    public List<Car> getCars() {
+        
+        List<Car> cars = new ArrayList<>();
         try {
             Context ctx = new InitialContext();
             DataSource ds = (DataSource)ctx.lookup("java:/comp/env/jdbc/Cars");
             try {
-                this.conn = ds.getConnection();
+                Connection conn = ds.getConnection();
                 PreparedStatement stmt = conn.prepareStatement("SELECT make, model, year FROM cars;")
                 ResultSet rs = stmt.executeQuery();
                 if (rs.next() == true) {
                     Car car = new Car();
-                    make = rs.getString("make");
-                    model = rs.getString("model");
-                    year = rs.getInt("year");
-                    car.add(make, model, year);
+                    String make = rs.getString(1);
+                    String model = rs.getString(2);
+                    int year = rs.getInt(3);
+                    car.setMake(make);
+                    car.setModel(model);
+                    car.setYear(year);
+                    cars.add(car);
                 }
             } catch (SQLException e) {
                 System.out.println(e.getMessage());
             }
-        } catch (SQLException e) {
+        } catch (SQLException | NamingException e) {
             System.out.println(e.getMessage());
         }
     }
+
     // TODO: Annotate that functions with a Produces annotation, and set the type to "application/json"
     // TODO: Annotate that functions with a Path annotation, and set the path to "all"
     // TODO: Annotate that functions with a GET annotation
@@ -71,6 +74,11 @@ public class App {
         // TODO: return the list you made at the start of this function
 
     // TODO: Make a function called getCarByMake that returns a List of Cars
+    @Produces("application/json")
+    @Path("make")
+    public List<Car> getCarByMake() {
+
+    }
     // TODO: Annotate that functions with a Produces annotation, and set the type to "application/json"
     // TODO: Annotate that functions with a Path annotation, and set the path to "{make}"
     // TODO: Annotate that functions with a GET annotation
