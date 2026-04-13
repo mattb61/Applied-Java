@@ -32,11 +32,12 @@ public class App {
         try {
             Context ctx = new InitialContext();
             DataSource ds = (DataSource)ctx.lookup("java:/comp/env/jdbc/Cars");
-            try {
+            try (
                 Connection conn = ds.getConnection();
                 PreparedStatement stmt = conn.prepareStatement("SELECT make, model, year FROM cars;");
                 ResultSet rs = stmt.executeQuery();
-                if (rs.next() == true) {
+            ) {
+                while (rs.next() == true) {
                     Car car = new Car();
                     String make = rs.getString(1);
                     String model = rs.getString(2);
@@ -77,23 +78,26 @@ public class App {
 
     // TODO: Make a function called getCarByMake that returns a List of Cars
     @Produces("application/json")
-    @Path("make")
+    @Path("{make}")
     @GET
     public List<Car> getCarByMake(
-        @PathParam("{make}") String make
+        @PathParam("make") String make
     ) {
         List<Car> cars = new ArrayList<>();
         try {
             Context ctx = new InitialContext();
             DataSource ds = (DataSource)ctx.lookup("java:/comp/env/jdbc/Cars");
-            try {
+            try (
                 Connection conn = ds.getConnection();
                 PreparedStatement stmt = conn.prepareStatement("SELECT model, year FROM cars WHERE make = ?;");
+            ) {
+                stmt.setString(1, make);
                 ResultSet rs = stmt.executeQuery();
-                if (rs.next() == true) {
+                while (rs.next() == true) {
                     Car car = new Car();
                     String model = rs.getString(1);
                     int year = rs.getInt(2);
+                    car.setMake(make);
                     car.setModel(model);
                     car.setYear(year);
                     cars.add(car);
@@ -146,7 +150,7 @@ public class App {
                 Connection conn = ds.getConnection();
                 PreparedStatement stmt = conn.prepareStatement("SELECT year FROM cars WHERE make = ? AND model = ?;");
                 ResultSet rs = stmt.executeQuery();
-                if (rs.next() == true) {
+                while (rs.next() == true) {
                     Car car = new Car();
                     stmt.setString(1, make);
                     stmt.setString(2, model);
