@@ -1,22 +1,22 @@
 package assignment3;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.sql.DataSource;
+
 import assignment3.model.Car;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
-
-import java.util.List;
-import java.util.ArrayList;
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import javax.naming.NamingException;
-import javax.sql.DataSource;
-import jakarta.inject.Named;
 
 // TODO: Annotate this class with a Path annotation, and set the path to "cars"
 @Path("cars")
@@ -34,7 +34,7 @@ public class App {
             DataSource ds = (DataSource)ctx.lookup("java:/comp/env/jdbc/Cars");
             try {
                 Connection conn = ds.getConnection();
-                PreparedStatement stmt = conn.prepareStatement("SELECT make, model, year FROM cars;")
+                PreparedStatement stmt = conn.prepareStatement("SELECT make, model, year FROM cars;");
                 ResultSet rs = stmt.executeQuery();
                 if (rs.next() == true) {
                     Car car = new Car();
@@ -49,9 +49,10 @@ public class App {
             } catch (SQLException e) {
                 System.out.println(e.getMessage());
             }
-        } catch (SQLException | NamingException e) {
+        } catch (NamingException e) {
             System.out.println(e.getMessage());
         }
+        return cars;
     }
 
     // TODO: Annotate that functions with a Produces annotation, and set the type to "application/json"
@@ -79,14 +80,31 @@ public class App {
     @Path("make")
     @GET
     public List<Car> getCarByMake(
-        @PathParam("make") String make
+        @PathParam("{make}") String make
     ) {
         List<Car> cars = new ArrayList<>();
         try {
             Context ctx = new InitialContext();
-            DataSource ds = (DataSource)ctx.lookup("java:/comp/env/jdbc/Cars")
-            PreparedStatement stmt = conn.prepareStatement
-        } 
+            DataSource ds = (DataSource)ctx.lookup("java:/comp/env/jdbc/Cars");
+            try {
+                Connection conn = ds.getConnection();
+                PreparedStatement stmt = conn.prepareStatement("SELECT model, year FROM cars WHERE make = ?;");
+                ResultSet rs = stmt.executeQuery();
+                if (rs.next() == true) {
+                    Car car = new Car();
+                    String model = rs.getString(1);
+                    int year = rs.getInt(2);
+                    car.setModel(model);
+                    car.setYear(year);
+                    cars.add(car);
+                }
+            } catch (SQLException e) {
+                System.out.println(e.getMessage());
+            }
+        } catch (NamingException e) {
+            System.out.println(e.getMessage());
+        }
+        return cars;
     }
     // TODO: Annotate that functions with a Produces annotation, and set the type to "application/json"
     // TODO: Annotate that functions with a Path annotation, and set the path to "{make}"
@@ -113,6 +131,37 @@ public class App {
         // TODO: return the list you made at the start of this function
 
     // TODO: Make a function called getCarByMakeAndModel that returns a List of Cars
+    @Produces("application/json")
+    @Path("{make}/{model}")
+    @GET
+        public List<Car> getCarByMakeAndModel(
+        @PathParam("make") String make,
+        @PathParam("model") String model
+    ) {
+        List<Car> cars = new ArrayList<>();
+        try {
+            Context ctx = new InitialContext();
+            DataSource ds = (DataSource)ctx.lookup("java:/comp/env/jdbc/Cars");
+            try {
+                Connection conn = ds.getConnection();
+                PreparedStatement stmt = conn.prepareStatement("SELECT year FROM cars WHERE make = ? AND model = ?;");
+                ResultSet rs = stmt.executeQuery();
+                if (rs.next() == true) {
+                    Car car = new Car();
+                    stmt.setString(1, make);
+                    stmt.setString(2, model);
+                    car.setMake(make);
+                    car.setModel(model);
+                    cars.add(car);
+                }
+            } catch (SQLException e) {
+                System.out.println(e.getMessage());
+            }
+        } catch (NamingException e) {
+            System.out.println(e.getMessage());
+        }
+        return cars;
+    }
     // TODO: Annotate that functions with a Produces annotation, and set the type to "application/json"
     // TODO: Annotate that functions with a Path annotation, and set the path to "{make}/{model}"
     // TODO: Annotate that functions with a GET annotation
