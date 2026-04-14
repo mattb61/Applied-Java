@@ -13,7 +13,9 @@ import javax.naming.NamingException;
 import javax.sql.DataSource;
 
 import assignment3.model.Car;
+import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
@@ -146,14 +148,17 @@ public class App {
         try {
             Context ctx = new InitialContext();
             DataSource ds = (DataSource)ctx.lookup("java:/comp/env/jdbc/Cars");
-            try {
+            try (
                 Connection conn = ds.getConnection();
                 PreparedStatement stmt = conn.prepareStatement("SELECT year FROM cars WHERE make = ? AND model = ?;");
+            ) {
+                stmt.setString(1, make);
+                stmt.setString(2, model);
                 ResultSet rs = stmt.executeQuery();
                 while (rs.next() == true) {
                     Car car = new Car();
-                    stmt.setString(1, make);
-                    stmt.setString(2, model);
+                    int year = rs.getInt(1);
+                    car.setYear(year);
                     car.setMake(make);
                     car.setModel(model);
                     cars.add(car);
@@ -193,6 +198,39 @@ public class App {
         // TODO: return the list you made at the start of this function
 
     // TODO: Make a function called getCarByYear that returns a List of Cars
+    @Produces("application/json")
+    @Path("yearof/{year}")
+    @GET
+        public List<Car> getCarByYear(
+        @PathParam("year") int year
+    ) {
+        List<Car> cars = new ArrayList<>();
+        try {
+            Context ctx = new InitialContext();
+            DataSource ds = (DataSource)ctx.lookup("java:/comp/env/jdbc/Cars");
+            try (
+                Connection conn = ds.getConnection();
+                PreparedStatement stmt = conn.prepareStatement("SELECT make, model FROM cars WHERE year = ?;");
+            ) {
+                stmt.setInt(1, year);
+                ResultSet rs = stmt.executeQuery();
+                while (rs.next() == true) {
+                    Car car = new Car();
+                    String make = rs.getString(1);
+                    String model = rs.getString(2);
+                    car.setYear(year);
+                    car.setMake(make);
+                    car.setModel(model);
+                    cars.add(car);
+                }
+            } catch (SQLException e) {
+                System.out.println(e.getMessage());
+            }
+        } catch (NamingException e) {
+            System.out.println(e.getMessage());
+        }
+        return cars;
+    }
     // TODO: Annotate that functions with a Produces annotation, and set the type to "application/json"
     // TODO: Annotate that functions with a Path annotation, and set the path to "yearof/{year}"
     // TODO: Annotate that functions with a GET annotation
@@ -218,6 +256,36 @@ public class App {
         // TODO: return the list you made at the start of this function
 
     // TODO: Make a function called postCar that returns a String
+    @Consumes("application/json")
+    @Path("")
+    @POST
+    public List<Car> postCar(Car car) {
+        List<Car> cars = new ArrayList<>();
+        try {
+            Context ctx = new InitialContext();
+            DataSource ds = (DataSource)ctx.lookup("java:/comp/env/jdbc/Cars");
+            try (
+                Connection conn = ds.getConnection();
+                PreparedStatement stmt = conn.prepareStatement("INSERT INTO cars (make, model, year) VALUES (?, ?, ?);");
+            ) {
+                stmt.setString(1, car.getMake());
+                stmt.setString(2, car.getModel());
+                stmt.setInt(3, car.getYear());
+                int result = stmt.executeUpdate();
+                if (result == 1) {
+                    System.out.println("Car posted successfully");
+                }
+                else {
+                    System.out.println("Failed to post new Car");
+                }
+            } catch (SQLException e) {
+                System.out.println(e.getMessage());
+            }
+        } catch (NamingException e) {
+            System.out.println(e.getMessage());
+        }
+        return cars;
+    }
     // TODO: Annotate that functions with a Consumes annotation, and set the type to "application/json"
     // TODO: Annotate that functions with a Path annotation, and set the path to ""
     // TODO: Annotate that functions with a POST annotation
